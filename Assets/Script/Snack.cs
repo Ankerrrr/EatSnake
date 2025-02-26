@@ -11,10 +11,9 @@ public class Snack : MonoBehaviour
     public GameUI gameui;
     public GameObject startMenu;
 
-    Vector3 direction;
+    Vector3 nowDirection;
+    Vector3 nextDirection;
     List<Transform> bodies = new List<Transform>();
-
-    bool waitForMoving = false;
 
 
     void Start()
@@ -26,56 +25,47 @@ public class Snack : MonoBehaviour
 
     void Update()
     {
-        if (!waitForMoving)
+        if ((Input.GetKeyDown(KeyCode.W)
+                || Input.GetKeyDown(KeyCode.UpArrow))
+                && nowDirection != Vector3.down)
         {
-            if ((Input.GetKeyDown(KeyCode.W)
-                    || Input.GetKeyDown(KeyCode.UpArrow))
-                    && direction != Vector3.down)
-            {
-                direction = Vector3.up;
-                waitForMoving = true;
-            }
-            else if ((Input.GetKeyDown(KeyCode.S)
-             || Input.GetKeyDown(KeyCode.DownArrow))
-            && direction != Vector3.up)
-            {
-                direction = Vector3.down;
-                waitForMoving = true;
-            }
-            else if ((Input.GetKeyDown(KeyCode.A)
-             || Input.GetKeyDown(KeyCode.LeftArrow))
-            && direction != Vector3.right)
-            {
-                direction = Vector3.left;
-                waitForMoving = true;
-            }
-            else if ((Input.GetKeyDown(KeyCode.D)
-             || Input.GetKeyDown(KeyCode.RightArrow))
-            && direction != Vector3.left)
-            {
-                direction = Vector3.right;
-                waitForMoving = true;
-            }
+            nextDirection = Vector3.up;
         }
+        else if ((Input.GetKeyDown(KeyCode.S)
+         || Input.GetKeyDown(KeyCode.DownArrow))
+        && nowDirection != Vector3.up)
+        {
+            nextDirection = Vector3.down;
+        }
+        else if ((Input.GetKeyDown(KeyCode.A)
+         || Input.GetKeyDown(KeyCode.LeftArrow))
+        && nowDirection != Vector3.right)
+        {
+            nextDirection = Vector3.left;
+        }
+        else if ((Input.GetKeyDown(KeyCode.D)
+         || Input.GetKeyDown(KeyCode.RightArrow))
+        && nowDirection != Vector3.left)
+        {
+            nextDirection = Vector3.right;
+        }
+
         if (startMenu.activeInHierarchy)
         {
-            direction = Vector3.zero;
+            nowDirection = Vector3.zero;
+            nextDirection = Vector3.zero;
         }
     }
 
     void FixedUpdate()
     {
+        nowDirection = nextDirection;
         for (int i = bodies.Count - 1; i > 0; i--)
         {
             bodies[i].position = bodies[i - 1].position;
         }
 
-        transform.Translate(direction);
-
-        if (waitForMoving)
-        {
-            waitForMoving = false;
-        }
+        transform.Translate(nowDirection);
     }
 
     void OnTriggerEnter2D(Collider2D collision)
@@ -110,7 +100,7 @@ public class Snack : MonoBehaviour
 
     public void stopSnack()
     {
-        direction = Vector3.zero;
+        nowDirection = Vector3.zero;
         Time.timeScale = 0;
 
     }
@@ -119,7 +109,7 @@ public class Snack : MonoBehaviour
     {
         Time.timeScale = gameSpeed;
 
-        direction = Vector3.zero;
+        nowDirection = Vector3.zero;
         transform.position = Vector3.zero;
 
         apple.GenerateApple();
